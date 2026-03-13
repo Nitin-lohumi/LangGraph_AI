@@ -32,22 +32,20 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
+
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 500,
       chunkOverlap: 50,
     });
     const docs = await splitter.createDocuments([parsed.text]);
-    console.log("📄 PDF Text:", parsed.text); 
     console.log(`Created ${docs.length} chunks`);
-    console.log("Chunk 0:", docs[0]?.pageContent); 
 
     const vectors = await embeddings.embedDocuments(
       docs.map((d) => d.pageContent),
     );
-    // await qdrant.deleteCollection("pdf_docs").catch(() => {});
-    // await qdrant.createCollection("pdf_docs", {
-    //   vectors: { size: 384, distance: "Cosine" },
-    // });
+
+    await ensureCollection();
+
     const points = vectors.map((vec, i) => ({
       id: uuid(),
       vector: vec,
@@ -63,7 +61,7 @@ export async function POST(req: NextRequest) {
       points,
     });
 
-    console.log(`✅ Upserted ${points.length} vectors`);
+    console.log(`✅ Upserted ${points.length} vectors for: ${file.name}`);
 
     return NextResponse.json({
       success: true,

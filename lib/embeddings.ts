@@ -1,16 +1,27 @@
-import { pipeline } from "@xenova/transformers";
-let embedder: any = null;
-async function getEmbedder() {
-  if (!embedder) {
-    embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-  }
-  return embedder;
-}
+const HF_API_URL =
+  "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2";
+const HF_TOKEN = process.env.HUGGINGFACE_API_TOKEN!;
 
 async function embedText(text: string): Promise<number[]> {
-  const extractor = await getEmbedder();
-  const output = await extractor(text, { pooling: "mean", normalize: true });
-  return Array.from(output.data) as number[];
+  const res = await fetch(HF_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${HF_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ inputs: text }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`HuggingFace embedding error: ${err}`);
+  }
+
+  const data = await res.json();
+  if (Array.isArray(data[0])) {
+    return data[0] as number[];
+  }
+  return data as number[];
 }
 
 export const embeddings = {
