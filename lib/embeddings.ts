@@ -1,5 +1,8 @@
+// Uses HuggingFace Inference API instead of local Xenova model
+// Works on Render, Vercel, any cloud — no local model download needed
+
 const HF_API_URL =
-  "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2";
+  "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction";
 const HF_TOKEN = process.env.HUGGINGFACE_API_TOKEN!;
 
 async function embedText(text: string): Promise<number[]> {
@@ -18,7 +21,10 @@ async function embedText(text: string): Promise<number[]> {
   }
 
   const data = await res.json();
+
+  // HF returns nested array for sentence transformers — flatten if needed
   if (Array.isArray(data[0])) {
+    // Batch or nested — take first
     return data[0] as number[];
   }
   return data as number[];

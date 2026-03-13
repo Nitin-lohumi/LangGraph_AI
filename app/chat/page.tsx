@@ -27,7 +27,7 @@ function CopyButton({ code }: { code: string }) {
       onClick={copy}
       className="text-xs px-2 py-1 rounded transition-colors cursor-pointer"
     >
-      {copied ? <FaCopy size={16} color="green"/> : <FaRegCopy size={16}/>}
+      {copied ? <FaCopy size={16} color="green" /> : <FaRegCopy size={16} />}
     </button>
   );
 }
@@ -43,14 +43,20 @@ function MarkdownMessage({ text }: { text: string }) {
           return !inline && match ? (
             <div className="relative my-2 rounded-lg overflow-hidden">
               <div className="flex items-center justify-between px-3 py-1.5 bg-gray-900 border-b border-gray-700">
-                <span className="text-xs text-gray-400 font-mono">{match[1]}</span>
+                <span className="text-xs text-gray-400 font-mono">
+                  {match[1]}
+                </span>
                 <CopyButton code={codeString} />
               </div>
               <SyntaxHighlighter
                 style={oneDark}
                 language={match[1]}
                 PreTag="div"
-                customStyle={{ margin: 0, borderRadius: 0, fontSize: "0.75rem" }}
+                customStyle={{
+                  margin: 0,
+                  borderRadius: 0,
+                  fontSize: "0.75rem",
+                }}
                 {...props}
               >
                 {codeString}
@@ -66,13 +72,25 @@ function MarkdownMessage({ text }: { text: string }) {
           );
         },
         p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-        ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
-        ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>,
+        ul: ({ children }) => (
+          <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="list-decimal pl-4 mb-2 space-y-1">{children}</ol>
+        ),
         li: ({ children }) => <li className="text-sm">{children}</li>,
-        h1: ({ children }) => <h1 className="text-lg font-bold mb-2 mt-1">{children}</h1>,
-        h2: ({ children }) => <h2 className="text-base font-bold mb-2 mt-1">{children}</h2>,
-        h3: ({ children }) => <h3 className="text-sm font-bold mb-1 mt-1">{children}</h3>,
-        strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
+        h1: ({ children }) => (
+          <h1 className="text-lg font-bold mb-2 mt-1">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-base font-bold mb-2 mt-1">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-sm font-bold mb-1 mt-1">{children}</h3>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-white">{children}</strong>
+        ),
         blockquote: ({ children }) => (
           <blockquote className="border-l-2 border-gray-500 pl-3 italic text-gray-300 my-2">
             {children}
@@ -173,7 +191,10 @@ export default function ChatPage() {
     }
 
     const aiIndex = chatRef.current.length;
-    chatRef.current = [...chatRef.current, { role: "ai", text: "", contextUsed: false }];
+    chatRef.current = [
+      ...chatRef.current,
+      { role: "ai", text: "", contextUsed: false },
+    ];
     setChat([...chatRef.current]);
 
     try {
@@ -227,7 +248,7 @@ export default function ChatPage() {
               chatRef.current = chatRef.current.map((msg, i) =>
                 i === aiIndex
                   ? { ...msg, text: streamedText, contextUsed }
-                  : msg
+                  : msg,
               );
               setChat([...chatRef.current]);
             }
@@ -237,7 +258,7 @@ export default function ChatPage() {
     } catch (err: any) {
       setError(err.message);
       chatRef.current = chatRef.current.map((msg, i) =>
-        i === aiIndex ? { ...msg, text: `Error: ${err.message}` } : msg
+        i === aiIndex ? { ...msg, text: `Error: ${err.message}` } : msg,
       );
       setChat([...chatRef.current]);
     } finally {
@@ -291,7 +312,6 @@ export default function ChatPage() {
         )}
       </div>
 
-  
       <div className="flex-1 min-h-0 overflow-y-auto md:max-w-7xl w-full mx-auto flex flex-col gap-2 p-2 scrollbar-hide">
         {chat.length === 0 && (
           <div className="text-center mt-32">
@@ -312,7 +332,6 @@ export default function ChatPage() {
                   : "bg-gray-800 text-gray-100 rounded-bl-sm"
               }`}
             >
-          
               {msg.attachedFile && (
                 <div className="flex items-center gap-2 px-4 pt-3 pb-2 border-b border-blue-500/40">
                   <FiFile size={14} className="shrink-0" />
@@ -341,10 +360,16 @@ export default function ChatPage() {
                   Analyze this PDF
                 </div>
               )}
-
             </div>
           </div>
         ))}
+        {uploading && (
+          <>
+            <div className="text-yellow-400 text-center text-xs animate-pulse">
+              uploading file...
+            </div>
+          </>
+        )}
         <div ref={bottomRef}></div>
       </div>
 
@@ -390,7 +415,9 @@ export default function ChatPage() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={loading ? "Waiting for response..." : "Ask anything.."}
+              placeholder={
+                loading ? "Waiting for response..." : "Ask anything.."
+              }
               rows={2}
               disabled={loading}
               className="flex-1 scrollbar-hide bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
