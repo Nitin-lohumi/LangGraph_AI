@@ -9,7 +9,7 @@ function Header() {
           <Link href={"/"}>AI chat Bot</Link>
         </div>
         <nav className="flex gap-1 text-gray-300">
-          <Link href={"/chat"} className="hover:text-white transition">
+           <Link href={"/vapiBot"} className="hover:text-white transition">
             <IoIosChatbubbles  size={25}/>
           </Link>
         </nav>
