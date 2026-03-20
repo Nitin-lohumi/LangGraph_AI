@@ -17,6 +17,7 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { FaRegCopy } from "react-icons/fa";
 import { FaCopy } from "react-icons/fa6";
 import Features from "@/component/Features";
+import { VoiceOverlay } from "@/component/VoiceOverlay";
 
 type Chat = {
   role: "user" | "ai";
@@ -138,6 +139,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string>("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("none");
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   const hasLoadedRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -194,6 +196,28 @@ export default function ChatPage() {
       setUploading(false);
     }
   };
+
+  const injectVoiceHistory = (voiceMsgs: { role: string; text: string }[]) => {
+  if (voiceMsgs.length === 0) return; 
+
+  const formatted: Chat[] = voiceMsgs.map((m) => ({
+    role: m.role === "user" ? "user" : "ai",
+    text: m.text,
+    webSearch: false,
+    attachedFile: undefined,
+    contextUsed: false,
+  }));
+
+  const separator: Chat = {
+    role: "ai",
+    text: "🎤 _Voice conversation saved_",
+    webSearch: false,
+  };
+
+  chatRef.current = [...chatRef.current, separator, ...formatted];
+  setChat([...chatRef.current]);
+  localStorage.setItem("chat_history", JSON.stringify(chatRef.current));
+};
 
   const sendMessage = async () => {
     if ((!message.trim() && !pendingFile) || loading || !sessionId) return;
@@ -371,9 +395,7 @@ export default function ChatPage() {
           <div className="text-center mt-32">
             <div className="text-5xl mb-3">🤖</div>
             <p className="text-lg text-gray-300"> AI Assistant</p>
-            <p className="text-sm text-gray-600 mt-1">
-              let's start chat
-            </p>
+            <p className="text-sm text-gray-600 mt-1">let's start chat</p>
           </div>
         )}
 
@@ -410,7 +432,7 @@ export default function ChatPage() {
               {msg.role === "ai" && msg.webSearch && (
                 <div className="px-4 pt-2 flex items-center gap-1">
                   <span className="text-xs text-green-400 opacity-70 flex items-center gap-1">
-                    <FiGlobe size={10} /> According to the web search 
+                    <FiGlobe size={10} /> According to the web search
                   </span>
                 </div>
               )}
@@ -555,6 +577,10 @@ export default function ChatPage() {
                     setMode("websearch");
                     setMenuOpen(false);
                   }}
+                  onVoiceConvo={() => {
+                    setVoiceOpen(true);
+                    setMenuOpen(false);
+                  }}
                 />
               )}
 
@@ -600,6 +626,14 @@ export default function ChatPage() {
           Shift + Enter for new line • Enter to send
         </p>
       </div>
+      {voiceOpen && (
+        <VoiceOverlay
+          onClose={() => setVoiceOpen(false)}
+          onSave={injectVoiceHistory}
+          sessionId={sessionId}
+          uploadedFiles={uploadedFiles}
+        />
+      )}
     </div>
   );
 }
